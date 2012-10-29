@@ -11,31 +11,27 @@ import (
 	"strings"
 )
 
-type Request struct {
-	method      string
-	href        string
-	queryString map[string]string
-	headers     map[string]string
-	body        string
+type RequestConfig struct {
+	Method      string
+	Href        string
+	QueryString map[string]string // Do we have to call this QueryString even tho it's a map?
+	Headers     map[string]string
+	Body        string
 }
 
-type RequestConfig struct {
-	HttpMethod  string
-	Href        string
-	QueryString map[string]string
-	HttpHeaders map[string]string
-	Body        string
+type Request struct {
+	RequestConfig
 }
 
 func NewRequest(c RequestConfig) (r *Request, err error) {
 	split := strings.Split(c.Href, "?")
 	if len(split) > 1 {
-		r.href = split[0]
+		r.Href = split[0]
 		qsStr := split[1]
 		for _, pair := range strings.Split(qsStr, "&") {
 			kv := strings.Split(pair, "=")
 			if len(kv) == 2 {
-				r.queryString[kv[0]] = kv[1]
+				r.QueryString[kv[0]] = kv[1]
 			} else {
 				// We'll return the error, but first we will go ahead and 
 				// construct as much of the Request object as we can.
@@ -43,11 +39,11 @@ func NewRequest(c RequestConfig) (r *Request, err error) {
 			}
 		}
 	} else {
-		r.href = c.Href
+		r.Href = c.Href
 	}
-	r.method = strings.ToUpper(c.HttpMethod)
-	r.headers = c.HttpHeaders
-	r.headers["Content-Length"] = strconv.Itoa((len(c.Body)))
+	r.Method = strings.ToUpper(c.Method)
+	r.Headers = c.Headers
+	r.Headers["Content-Length"] = strconv.Itoa((len(c.Body)))
 	return r, err
 
 }
@@ -55,14 +51,14 @@ func NewRequest(c RequestConfig) (r *Request, err error) {
 // ResourceUri returns the Request's href as a URL object.
 func (r *Request) ResourceUri() (*url.URL, error) {
 	// Is url.ParseRequestURI() more appropriate than url.Parse()?
-	return url.ParseRequestURI(r.href)
+	return url.ParseRequestURI(r.Href)
 }
 
 // ToSQueryString returns a string representation of this Request's queryString
 // map.
 func (r *Request) ToSQueryString(canonical bool) string {
 	var result string
-	for k, v := range r.queryString {
+	for k, v := range r.QueryString {
 		encK := util.EncodeUrl(k, false, canonical)
 		encV := util.EncodeUrl(v, false, canonical)
 		if result != "" {
