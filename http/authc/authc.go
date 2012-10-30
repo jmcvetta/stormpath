@@ -1,7 +1,7 @@
 // Copyright (c) 2012 Jason McVetta.  This is Free Software, released under the 
 // terms of the GPL v3.  See http://www.gnu.org/copyleft/gpl.html for details.
 
-// Package sauthc1 implements the SAuthc1 Stormpath cryptographic digest
+// Package authc implements the Sauthc1 Stormpath cryptographic digest
 // authentication algorithm.
 package authc
 
@@ -13,18 +13,28 @@ import (
 	"crypto/rand"
 	"math"
 	"math/big"
-	"net/http"
+	"sort"
+	// "bytes"
+	"crypto"
+	"crypto/sha256"
+	"encoding/hex"
 	"strconv"
+	"strings"
 	"time"
 	// "encoding/base64"
 	"github.com/jmcvetta/guid"
+	"github.com/jmcvetta/stormpath/http"
+	"github.com/jmcvetta/stormpath/util"
 	// "github.com/jmcvetta/randutil"
 )
 
-type ApiKey string
+type ApiKey struct {
+	Id     string
+	Secret string
+}
 
 type Sauthc1Signer struct {
-	DefaultAlgorithm     string
+	DefaultAlgorithm     crypto.Hash
 	HostHeader           string
 	AuthorizationHeader  string
 	StorpathDateHeader   string
@@ -42,9 +52,9 @@ type Sauthc1Signer struct {
 
 // DefaultSigner returns a new Sauthc1Signer object initialized with the default
 // values.
-func DefaultSigner() Sauthc1Signer {
+func NewSigner() Sauthc1Signer {
 	s := Sauthc1Signer{
-		DefaultAlgorithm:     "SHA256",
+		DefaultAlgorithm:     crypto.SHA256,
 		HostHeader:           "Host",
 		AuthorizationHeader:  "Authorization",
 		StorpathDateHeader:   "X-Stormpath-Date",
@@ -89,40 +99,108 @@ func (s *Sauthc1Signer) Sign(req *http.Request, key ApiKey) error {
 	if err != nil {
 		return err
 	}
-	u := req.URL
+	u, err := req.ResourceUri()
+	if err != nil {
+		return err
+	}
 	host := u.Host
 	/*
-	In the Ruby version of this algorithm, we see the following code to check
-	default port and append append the port if unspecified.
-	
-          host_header = uri.host
-          if !RequestUtils.default_port?(uri)
+			In the Ruby version of this algorithm, we see the following code to check
+			default port and append append the port if unspecified.
 
-            host_header << ":" << uri.port.to_s
-          end
-          
-	It appears this is required because Ruby's URI module splits host and port into
-	seperate variables.  Go keeps them as a single string, so I do not this this
-	will be necessary.
+		          host_header = uri.host
+		          if !RequestUtils.default_port?(uri)
+
+		            host_header << ":" << uri.port.to_s
+		          end
+
+			It appears this is required because Ruby's URI module splits host and port into
+			seperate variables.  Go keeps them as a single string, so I do not think this
+			will be necessary.
 	*/
-	req.Header.Add(s.HostHeader, host)
-	req.Header.Add(s.StorpathDateHeader, timeStamp)
-	method := req.Method
-	canResPath := canonicalizeResourcePath(u.Path)
-	
+	req.Headers[s.HostHeader] = host
+	req.Headers[s.StorpathDateHeader] = timeStamp
+	canResPath := s.canonicalizeResourcePath(u.Path)
+	canQs := s.canonicalizeQueryString(req)
+	signedHeaders := s.getSignedHeaders(req)
+	canHeaders := s.canonicalizeHeaders(req)
+	// print( method, canResPath, canQs, sighedHeaders, dateStamp, nonce)
+	payloadHash := hex.EncodeToString([]byte(s.hash(req.Body)))
+	nl := s.Newline
+	canReq := req.Method + nl +
+		canResPath + nl +
+		canQs + nl +
+		canHeaders + nl +
+		signedHeaders + nl +
+		payloadHash
+	canReqHash := s.hash(canReq)
+	id := key.Id + "/" + dateStamp + "/" + nonce + "/" + s.IdTerminator
+	stringToSign := s.Algorithm + nl +
+		timeStamp + nl +
+		id + nl +
+		canReqHash
+	// SAuthc1 uses a series of derived keys, formed by hashing different pieces of data
+	kSecret := s.AuthenticationScheme + key.Secret
+
 	return nil // Success!
 }
 
-
-
 // canonicalizeResourcePath returns the canonical form of a URI resource path.
-func canonicalizeResourcePath(path string) string {
+func (s *Sauthc1Signer) canonicalizeResourcePath(path string) string {
 	if path == "" {
 		return "/"
 	}
-	return encodeUrl(path, true, true)
+	return util.EncodeUrl(path, true, true)
 }
 
+func (s *Sauthc1Signer) canonicalizeQueryString(r *http.Request) string {
+	return r.ToSQueryString(true)
+}
 
+// sortedHeaderKeys returns the keys of the Headers map, sorted in
+// alphabetical order.
+func (s *Sauthc1Signer) sortedHeaderKeys(r *http.Request) []string {
+	// http://stackoverflow.com/a/2039180/164308
+	keys := make([]string, len(r.QueryString))
+	i := 0
+	for k, _ := range r.QueryString {
+		keys[i] = k
+		i++
+	}
+	sort.Strings(keys)
+	return keys
+}
 
+func (s *Sauthc1Signer) getSignedHeaders(r *http.Request) string {
+	keys := s.sortedHeaderKeys(r)
+	var result string
+	for _, header := range keys {
+		if result != "" {
+			result += ";" + header
+		} else {
+			result += header
+		}
+	}
+	return strings.ToLower(result)
+}
 
+func (s *Sauthc1Signer) hash(text string) []byte {
+	h := sha256.New()
+	h.Write([]byte(text))
+	return h.Sum(nil)
+
+}
+
+func (s *Sauthc1Signer) canonicalizeHeaders(r *http.Request) string {
+	var result string
+	keys := s.sortedHeaderKeys(r)
+	for _, header := range keys {
+		result += strings.ToLower(header) + ":" + r.Headers[header]
+		result += s.Newline
+	}
+	return result
+}
+
+func (s *Sauthc1Signer) sign(data, key string, algorithm crypto.Hash) string {
+	hash := algorithm.New()
+}
