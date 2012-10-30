@@ -5,34 +5,33 @@
 // authentication algorithm.
 package authc
 
-// This code was inspired by the official Stormpath Ruby and Java algos:
+// This code was inspired by the official Stormpath Ruby and Java SDKS:
 //     https://github.com/stormpath/stormpath-sdk-ruby/blob/master/lib/stormpath-sdk/http/authc/sauthc1_signer.rb
 //     https://github.com/stormpath/stormpath-sdk-java/blob/master/impl/src/main/java/com/stormpath/sdk/impl/http/authc/Sauthc1Signer.java
 
 import (
-	"crypto/rand"
-	"math"
-	"math/big"
-	"sort"
-	// "bytes"
 	"crypto"
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
-	"strconv"
-	"strings"
-	"time"
-	// "encoding/base64"
 	"github.com/jmcvetta/guid"
 	"github.com/jmcvetta/stormpath/http"
 	"github.com/jmcvetta/stormpath/util"
-	// "github.com/jmcvetta/randutil"
+	"math"
+	"math/big"
+	"sort"
+	"strconv"
+	"strings"
+	"time"
 )
 
+// An ApiKey holds credentials for accessing an API.
 type ApiKey struct {
 	Id     string
 	Secret string
 }
 
+// A Sauthc1Signer signs HTTP requests using the Sauthc1 algorithm.
 type Sauthc1Signer struct {
 	DefaultAlgorithm     crypto.Hash
 	HostHeader           string
@@ -50,8 +49,7 @@ type Sauthc1Signer struct {
 	GuidGenerator        guid.Generator
 }
 
-// DefaultSigner returns a new Sauthc1Signer object initialized with the default
-// values.
+// NewSigner returns a Sauthc1Signer object initialized with default values.
 func NewSigner() Sauthc1Signer {
 	s := Sauthc1Signer{
 		DefaultAlgorithm:     crypto.SHA256,
@@ -67,7 +65,7 @@ func NewSigner() Sauthc1Signer {
 		DateFormat:           "%Y%m%d",
 		TimestampFormat:      "%Y%m%dT%H%M%SZ",
 		Newline:              "\n",
-		GuidGenerator:        guid.SimpleGenerator(),
+		GuidGenerator:        guid.SimpleGenerator(), // NOT configured for multi-instance snowflake GUIDs!
 	}
 	return s
 }
