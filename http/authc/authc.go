@@ -14,6 +14,7 @@ This code was inspired by the official Stormpath Ruby and Java SDKS:
 */
 
 import (
+	"crypto"
 	"crypto/hmac"
 	"crypto/rand"
 	"crypto/sha256"
@@ -50,14 +51,13 @@ type Sauthc1Signer struct {
 	DateFormat           string
 	TimestampFormat      string
 	Newline              string
-	HashAlgo             func() hash.Hash // For use as argument to hmac.New()
-	GuidGenerator        guid.Generator   // Snowflake GUIDs in nonce()
+	HashAlgo             crypto.Hash
+	GuidGenerator        guid.Generator // Snowflake GUIDs in nonce()
 }
 
 // NewSigner returns a Sauthc1Signer object initialized with default values.
 func NewSigner() Sauthc1Signer {
 	s := Sauthc1Signer{
-		HashAlgo:             sha256.New,
 		HostHeader:           "Host",
 		AuthorizationHeader:  "Authorization",
 		StorpathDateHeader:   "X-Stormpath-Date",
@@ -70,6 +70,7 @@ func NewSigner() Sauthc1Signer {
 		DateFormat:           "%Y%m%d",
 		TimestampFormat:      "%Y%m%dT%H%M%SZ",
 		Newline:              "\n",
+		HashAlgo:             crypto.SHA256,
 		GuidGenerator:        guid.SimpleGenerator(), // NOT configured for multi-instance snowflake GUIDs!
 	}
 	return s
@@ -128,7 +129,7 @@ func (s *Sauthc1Signer) SignRequest(req *http.Request, key ApiKey) error {
 	canQs := s.canonicalizeQueryString(req)
 	signedHeaders := s.getSignedHeaders(req)
 	canHeaders := s.canonicalizeHeaders(req)
-	payloadHash := hex.EncodeToString([]byte(s.hash(req.Body)))
+	payloadHash := hex.EncodeToString(s.sha256Hash(req.Body))
 	nl := s.Newline
 	canReq := req.Method + nl +
 		canResPath + nl +
@@ -136,7 +137,7 @@ func (s *Sauthc1Signer) SignRequest(req *http.Request, key ApiKey) error {
 		canHeaders + nl +
 		signedHeaders + nl +
 		payloadHash
-	canReqHash := string(s.hash(canReq))
+	canReqHash := string(s.sha256Hash(canReq))
 	id := key.Id + "/" + dateStamp + "/" + nonce + "/" + s.IdTerminator
 	stringToSign := s.Algorithm + nl +
 		timeStamp + nl +
@@ -205,11 +206,11 @@ func (s *Sauthc1Signer) getSignedHeaders(r *http.Request) string {
 	return strings.ToLower(result)
 }
 
-func (s *Sauthc1Signer) hash(text string) []byte {
+// sha256Hash returns the SHA256 hash of text.
+func (s *Sauthc1Signer) sha256Hash(text string) []byte {
 	h := sha256.New()
 	h.Write([]byte(text))
 	return h.Sum(nil)
-
 }
 
 func (s *Sauthc1Signer) canonicalizeHeaders(r *http.Request) string {
@@ -222,8 +223,10 @@ func (s *Sauthc1Signer) canonicalizeHeaders(r *http.Request) string {
 	return result
 }
 
-func (s *Sauthc1Signer) sign(data, key string, algo func() hash.Hash) string {
-	hash := hmac.New(algo, []byte(key))
+// sign cryptographically signs data with the provided key and algorithm,
+// returning a hashed value.
+func (s *Sauthc1Signer) sign(data, key string, algo crypto.Hash) string {
+	hash := hmac.New(func() hash.Hash { return algo.New() }, []byte(key))
 	hash.Write([]byte(data))
 	return string(hash.Sum(nil))
 }
