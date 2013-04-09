@@ -9,3 +9,11 @@ import "errors"
 var (
 	BadResponse = errors.New("Bad response from server.")
 )
+
+type StormpathError struct {
+	Status           int
+	Message          string
+	Code             int
+	MoreInfo         string
+	DeveloperMessage string
+}

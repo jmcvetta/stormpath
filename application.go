@@ -5,7 +5,7 @@
 package stormpath
 
 import (
-	"github.com/jmcvetta/restclient"
+	"net/url"
 )
 
 // An Application in represents a real world application that can communicate
@@ -13,7 +13,11 @@ import (
 // mapped to one or more directories or groups, whose users are then granted
 // access to the application.
 type Application struct {
-	Href string // Stormpath URL for this application
+	Href      string // Stormpath URL for this application
+	ApiId     string // Stormpath API key ID
+	ApiSecret string // Stormpath API key secret
 }
 
-
+func (a *Application) Userinfo() *url.Userinfo {
+	return url.UserPassword(a.ApiId, a.ApiSecret)
+}
