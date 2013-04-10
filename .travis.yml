@@ -1,10 +1,24 @@
+---
 language: go
 notificaitons:
   email:
-    recipients:
-      jason.mcvetta@gmail.com
+    recipients: jason.mcvetta@gmail.com
     on_success: change
     on_failure: always
 before_script:
-  - go get -v github.com/bmizerany/assert
-  - go get -v github.com/jmcvetta/randutil
+- go get -v github.com/bmizerany/assert
+- go get -v github.com/jmcvetta/randutil
+env:
+  global:
+  - secure: |-
+      m2x+bIMvTpRjkX4+eApUIhDG+jKk7dfakF/ulFlXO2nSJv1N8NHYvXAOI2UE
+      H+gICvtgah9qyZsaKbLkJyjSjrQS1jiHm3ZHCI6LEBmgKkY9OY0c/RH8puPE
+      TwFEpbMqXgn1JMUe9Kzflpf18JEUGXWc+ctSRaM/ttXFkJJHBRo=
+  - secure: |-
+      bF4nznjNdXx8bzpJe5ZT8y37hwEjRDlPDJos8Qte35umOppx9sLOT5VaeW3Q
+      a1yzNn1h4gYBVVdrXYo8oi419nYKSqynest6B7nXOI826Xi1jJT7eHYepsup
+      Lu+Ok/KYjMRE++T/8ISBiNIvfApnix0DT7DZ5PB7AAwOJWlfW88=
+  - secure: |-
+      e59+FcH6kKjhNJfTG+1hgHQjCD7sORvJytotEGgyaR42MqN1tEa4BvlHiK+Q
+      er0fHld6iLAuLiH0G4k9VhnXASrwe1tQ7Q73xJkYh9y/L4+kCaLKRdobtHrL
+      8ogVQSHX/GdlPT4Rnnm5l9TVFAwbJlumXbTsrBJtvKxlnzWbRUM=
