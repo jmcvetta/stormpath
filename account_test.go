@@ -82,6 +82,7 @@ func TestUpdateAccount(t *testing.T) {
 	acct0, _ := app.CreateAccount(tmpl)
 	defer acct0.Delete()
 	acct0.GivenName = "Mister"
+	acct0.MiddleName = ""
 	acct0.Surname = "Spock"
 	err := acct0.Update()
 	if err != nil {
