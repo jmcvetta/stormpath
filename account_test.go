@@ -46,7 +46,7 @@ func TestCreateAccount(t *testing.T) {
 	tmpl := createAccountTemplate(t)
 	acct, err := app.CreateAccount(tmpl)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	//
 	// Cleanup
@@ -67,14 +67,27 @@ func TestDeleteAccount(t *testing.T) {
 func TestGetAccount(t *testing.T) {
 	app := setupApplication(t)
 	tmpl := createAccountTemplate(t)
-	acct0, err := app.CreateAccount(tmpl)
-	if err != nil {
-		t.Error(err)
-	}
+	acct0, _ := app.CreateAccount(tmpl)
 	defer acct0.Delete()
 	acct1, err := app.GetAccount(acct0.Href)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	assert.Equal(t, acct0, acct1)
+}
+
+func TestUpdateAccount(t *testing.T) {
+	app := setupApplication(t)
+	tmpl := createAccountTemplate(t)
+	acct0, _ := app.CreateAccount(tmpl)
+	defer acct0.Delete()
+	acct0.GivenName = "Mister"
+	acct0.Surname = "Spock"
+	err := acct0.Update()
+	if err != nil {
+		t.Fatal(err)
+	}
+	acct1, _ := app.GetAccount(acct0.Href)
+	assert.Equal(t, "Mister", acct1.GivenName)
+	assert.Equal(t, "Spock", acct1.Surname)
 }

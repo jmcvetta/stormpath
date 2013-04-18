@@ -9,6 +9,11 @@ import (
 	"log"
 )
 
+// An Href is a container for URL links
+type Href struct {
+	Href string `json:"href"`
+}
+
 // Users are referred to as user account objects or accounts. The username and
 // email fields for accounts are unique within a directory and are used to log
 // into applications.
@@ -21,9 +26,9 @@ type Account struct {
 	MiddleName string `json:"middleName,omitempty"` // The middle (second) name for the account holder.	1 < N <= 255 characters
 	Surname    string `json:"surname,omitempty"`    // The surname (last name) for the account holder.	1 < N <= 255 characters
 	Status     string `json:"status,omitempty"`     // Enabled accounts are able to login to their assigned applications.	Enum	enabled,disabled
-	Groups     string `json:"groups,omitempty"`     // A link to the groups that the account belongs to.
-	Directory  string `json:"directory,omitempty"`  // A link to the owning directory.
-	Tenant     string `json:"tenant,omitempty"`     // A link to the tenant owning the directory the group belongs to.
+	Groups     Href   `json:"groups,omitempty"`     // A link to the groups that the account belongs to.
+	Directory  Href   `json:"directory,omitempty"`  // A link to the owning directory.
+	Tenant     Href   `json:"tenant,omitempty"`     // A link to the tenant owning the directory the group belongs to.
 	app        *Application
 }
 
@@ -46,4 +51,26 @@ func (a *Account) Delete() error {
 		return BadResponse
 	}
 	return nil // Successful deletion
+}
+
+// Update saves the account to Stormpath.
+func (a *Account) Update() error {
+	e := new(StormpathError)
+	rr := restclient.RequestResponse{
+		Userinfo: a.app.userinfo(),
+		Url:      a.Href,
+		Method:   "POST",
+		Data: &a,
+		Error:    e,
+	}
+	status, err := restclient.Do(&rr)
+	if err != nil {
+		return err
+	}
+	if status != 200 {
+		log.Println(status)
+		log.Println(e)
+		return BadResponse
+	}
+	return nil // Successful update
 }
