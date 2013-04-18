@@ -1,7 +1,7 @@
 stormpath
 =========
 
-Golang SDK for Stormpath user management API
+Golang SDK for [Stormpath](https://stormpath.com) user management API.
 
 
 # Documentation
@@ -12,6 +12,9 @@ documentation.
 
 # Status
 
+`stormpath` is a work in progress.  It is not yet ready for production use.
+
 [![Build Status](https://travis-ci.org/jmcvetta/stormpath.png)](https://travis-ci.org/jmcvetta/stormpath)
 
-This is a work in progress.  It is not ready for production use.
+[![Build Status](https://drone.io/github.com/jmcvetta/stormpath/status.png)](https://drone.io/github.com/jmcvetta/stormpath/latest)
+
