@@ -27,6 +27,7 @@ type Account struct {
 	app        *Application
 }
 
+// Delete removes an account from Stormpath.
 func (a *Account) Delete() error {
 	e := new(StormpathError)
 	rr := restclient.RequestResponse{

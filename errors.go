@@ -11,6 +11,7 @@ var (
 	InvalidUsernamePassword = errors.New("Invalid username or password.")
 )
 
+// A StormpathError is an error message returned by the Stormpath API.
 type StormpathError struct {
 	Status           int
 	Message          string

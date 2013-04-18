@@ -25,7 +25,7 @@ func (a *Application) userinfo() *url.Userinfo {
 	return url.UserPassword(a.ApiId, a.ApiSecret)
 }
 
-// func (a *Application) CreateAccount(username, password, email, surname, givenName string) (*Account, error) {
+// CreateAccount creates a new account accessible to the application.
 func (app *Application) CreateAccount(template Account) (Account, error) {
 	/*
 		data := &map[string]string{
