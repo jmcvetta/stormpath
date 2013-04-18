@@ -5,6 +5,7 @@
 package stormpath
 
 import (
+	"encoding/base64"
 	"github.com/jmcvetta/restclient"
 	"log"
 	"net/url"
@@ -57,6 +58,44 @@ func (app *Application) CreateAccount(template Account) (Account, error) {
 		return acct, BadResponse
 	}
 	return acct, nil
+}
+
+// Authenticate with Stormpath using supplied credentials.  Username may be
+// either a username or the user's email.
+func (app *Application) Authenticate(username, password string) (Account, error) {
+	acct := Account{}
+	s := username + ":" + password
+	value := base64.URLEncoding.EncodeToString([]byte(s))
+	m := map[string]string{
+		"type":  "basic",
+		"value": value,
+	}
+	loginUrl := app.Href + "/loginAttempts"
+	var res struct {
+		Account struct {
+			Href string `json:"href"`
+		} `json:"account"`
+	}
+	e := new(StormpathError)
+	rr := restclient.RequestResponse{
+		Userinfo: app.userinfo(),
+		Url:      loginUrl,
+		Method:   "POST",
+		Data:     &m,
+		Result:   &res,
+		Error:    &e,
+	}
+	status, err := restclient.Do(&rr)
+	if err != nil {
+		return acct, err
+	}
+	if status != 200 {
+		log.Println(status)
+		log.Println(res)
+		log.Println(e)
+		return acct, InvalidUsernamePassword
+	}
+	return app.GetAccount(res.Account.Href)
 }
 
 func (app *Application) GetAccount(href string) (Account, error) {

@@ -7,7 +7,8 @@ package stormpath
 import "errors"
 
 var (
-	BadResponse = errors.New("Bad response from server.")
+	BadResponse             = errors.New("Bad response from server.")
+	InvalidUsernamePassword = errors.New("Invalid username or password.")
 )
 
 type StormpathError struct {
