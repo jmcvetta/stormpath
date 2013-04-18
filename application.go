@@ -98,6 +98,7 @@ func (app *Application) Authenticate(username, password string) (Account, error)
 	return app.GetAccount(res.Account.Href)
 }
 
+// GetAccount returns the specified account object, if it exists.
 func (app *Application) GetAccount(href string) (Account, error) {
 	acct := Account{}
 	e := new(StormpathError)
