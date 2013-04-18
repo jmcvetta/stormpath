@@ -58,3 +58,26 @@ func (app *Application) CreateAccount(template Account) (Account, error) {
 	}
 	return acct, nil
 }
+
+func (app *Application) GetAccount(href string) (Account, error) {
+	acct := Account{}
+	e := new(StormpathError)
+	rr := restclient.RequestResponse{
+		Userinfo: app.userinfo(),
+		Url:      href,
+		Method:   "GET",
+		Result:   &acct,
+		Error:    e,
+	}
+	status, err := restclient.Do(&rr)
+	if err != nil {
+		return acct, err
+	}
+	acct.app = app
+	if status != 200 {
+		log.Println(status)
+		log.Println(e)
+		return acct, BadResponse
+	}
+	return acct, nil
+}

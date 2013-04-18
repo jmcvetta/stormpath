@@ -3,12 +3,15 @@
 package stormpath
 
 import (
+	"github.com/bmizerany/assert"
 	"github.com/darkhelmet/env"
 	"github.com/jmcvetta/randutil"
+	"log"
 	"testing"
 )
 
 func setupApplication(t *testing.T) *Application {
+	log.SetFlags(log.Ltime | log.Ldate | log.Lshortfile)
 	spApp := env.String("STORMPATH_APP")
 	apiId := env.String("STORMPATH_API_ID")
 	apiSecret := env.String("STORMPATH_API_SECRET")
@@ -59,4 +62,19 @@ func TestDeleteAccount(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+}
+
+func TestGetAccount(t *testing.T) {
+	app := setupApplication(t)
+	tmpl := createAccountTemplate(t)
+	acct0, err := app.CreateAccount(tmpl)
+	if err != nil {
+		t.Error(err)
+	}
+	defer acct0.Delete()
+	acct1, err := app.GetAccount(acct0.Href)
+	if err != nil {
+		t.Error(err)
+	}
+	assert.Equal(t, acct0, acct1)
 }
