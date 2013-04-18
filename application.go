@@ -5,6 +5,8 @@
 package stormpath
 
 import (
+	"github.com/jmcvetta/restclient"
+	"log"
 	"net/url"
 )
 
@@ -20,4 +22,39 @@ type Application struct {
 
 func (a *Application) userinfo() *url.Userinfo {
 	return url.UserPassword(a.ApiId, a.ApiSecret)
+}
+
+// func (a *Application) CreateAccount(username, password, email, surname, givenName string) (*Account, error) {
+func (app *Application) CreateAccount(template Account) (Account, error) {
+	/*
+		data := &map[string]string{
+			"username":  username,
+			"password":  password,
+			"email":     email,
+			"surname":   surname,
+			"givenName": givenName,
+		}
+	*/
+	url := app.Href + "/accounts"
+	acct := Account{}
+	e := new(StormpathError)
+	rr := restclient.RequestResponse{
+		Userinfo: app.userinfo(),
+		Url:      url,
+		Method:   "POST",
+		Data:     &template,
+		Result:   &acct,
+		Error:    e,
+	}
+	status, err := restclient.Do(&rr)
+	if err != nil {
+		return acct, err
+	}
+	acct.app = app
+	if status != 201 {
+		log.Println(status)
+		log.Println(e)
+		return acct, BadResponse
+	}
+	return acct, nil
 }
