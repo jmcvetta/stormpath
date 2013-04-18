@@ -42,7 +42,7 @@ func (app *Application) CreateAccount(template Account) (Account, error) {
 	acct := Account{}
 	e := new(StormpathError)
 	rr := restclient.RequestResponse{
-		Userinfo: app.Userinfo(),
+		Userinfo: app.userinfo(),
 		Url:      url,
 		Method:   "POST",
 		Data:     &template,
@@ -65,7 +65,7 @@ func (app *Application) CreateAccount(template Account) (Account, error) {
 func (a *Account) Delete() error {
 	e := new(StormpathError)
 	rr := restclient.RequestResponse{
-		Userinfo: a.app.Userinfo(),
+		Userinfo: a.app.userinfo(),
 		Url:      a.Href,
 		Method:   "DELETE",
 		Error:    e,

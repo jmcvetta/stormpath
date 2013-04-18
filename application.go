@@ -18,6 +18,6 @@ type Application struct {
 	ApiSecret string // Stormpath API key secret
 }
 
-func (a *Application) Userinfo() *url.Userinfo {
+func (a *Application) userinfo() *url.Userinfo {
 	return url.UserPassword(a.ApiId, a.ApiSecret)
 }
