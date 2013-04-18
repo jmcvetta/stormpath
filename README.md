@@ -1,7 +1,7 @@
 stormpath
 =========
 
-Golang SDK for [Stormpath](https://stormpath.com) user management API.
+Golang SDK for [Stormpath](https://www.stormpath.com) user management API.
 
 
 # Documentation
