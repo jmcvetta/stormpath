@@ -18,3 +18,5 @@ documentation.
 
 [![Build Status](https://drone.io/github.com/jmcvetta/stormpath/status.png)](https://drone.io/github.com/jmcvetta/stormpath/latest)
 
+[![Coverage Status](https://coveralls.io/repos/jmcvetta/stormpath/badge.png?branch=master)](https://coveralls.io/r/jmcvetta/stormpath)
+
