@@ -71,7 +71,7 @@ func (app *Application) Authenticate(username, password string) (Account, error)
 		"value": value,
 	}
 	loginUrl := app.Href + "/loginAttempts"
-	var res struct {
+	var resp struct {
 		Account struct {
 			Href string `json:"href"`
 		} `json:"account"`
@@ -82,20 +82,20 @@ func (app *Application) Authenticate(username, password string) (Account, error)
 		Url:      loginUrl,
 		Method:   "POST",
 		Payload:  &m,
-		Result:   &res,
+		Result:   &resp,
 		Error:    &e,
 	}
-	resp, err := napping.Send(req)
+	res, err := napping.Send(req)
 	if err != nil {
 		return acct, err
 	}
-	if resp.Status() != 200 {
-		log.Println(resp.Status())
+	if res.Status() != 200 {
+		log.Println(res.Status())
 		log.Println(res)
 		log.Println(e)
 		return acct, InvalidUsernamePassword
 	}
-	return app.GetAccount(res.Account.Href)
+	return app.GetAccount(resp.Account.Href)
 }
 
 // GetAccount returns the specified account object, if it exists.
