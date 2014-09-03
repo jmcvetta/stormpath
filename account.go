@@ -5,7 +5,7 @@
 package stormpath
 
 import (
-	"github.com/jmcvetta/restclient"
+	"github.com/jmcvetta/napping"
 	"log"
 )
 
@@ -35,18 +35,18 @@ type Account struct {
 // Delete removes an account from Stormpath.
 func (a *Account) Delete() error {
 	e := new(StormpathError)
-	rr := restclient.RequestResponse{
+	req := &napping.Request{
 		Userinfo: a.app.userinfo(),
 		Url:      a.Href,
 		Method:   "DELETE",
 		Error:    e,
 	}
-	status, err := restclient.Do(&rr)
+	res, err := napping.Send(req)
 	if err != nil {
 		return err
 	}
-	if status != 204 {
-		log.Println(status)
+	if res.Status() != 204 {
+		log.Println(res.Status())
 		log.Println(e)
 		return BadResponse
 	}
@@ -56,19 +56,19 @@ func (a *Account) Delete() error {
 // Update saves the account to Stormpath.
 func (a *Account) Update() error {
 	e := new(StormpathError)
-	rr := restclient.RequestResponse{
+	req := &napping.Request{
 		Userinfo: a.app.userinfo(),
 		Url:      a.Href,
 		Method:   "POST",
-		Data: &a,
+		Payload:  &a,
 		Error:    e,
 	}
-	status, err := restclient.Do(&rr)
+	res, err := napping.Send(req)
 	if err != nil {
 		return err
 	}
-	if status != 200 {
-		log.Println(status)
+	if res.Status() != 200 {
+		log.Println(res.Status())
 		log.Println(e)
 		return BadResponse
 	}
