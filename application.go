@@ -6,7 +6,7 @@ package stormpath
 
 import (
 	"encoding/base64"
-	"github.com/jmcvetta/restclient"
+	"github.com/jmcvetta/napping"
 	"log"
 	"net/url"
 )
@@ -39,21 +39,21 @@ func (app *Application) CreateAccount(template Account) (Account, error) {
 	url := app.Href + "/accounts"
 	acct := Account{}
 	e := new(StormpathError)
-	rr := restclient.RequestResponse{
+	req := &napping.Request{
 		Userinfo: app.userinfo(),
 		Url:      url,
 		Method:   "POST",
-		Data:     &template,
+		Payload:  &template,
 		Result:   &acct,
 		Error:    e,
 	}
-	status, err := restclient.Do(&rr)
+	res, err := napping.Send(req)
 	if err != nil {
 		return acct, err
 	}
 	acct.app = app
-	if status != 201 {
-		log.Println(status)
+	if res.Status() != 201 {
+		log.Println(res.Status())
 		log.Println(e)
 		return acct, BadResponse
 	}
@@ -71,51 +71,51 @@ func (app *Application) Authenticate(username, password string) (Account, error)
 		"value": value,
 	}
 	loginUrl := app.Href + "/loginAttempts"
-	var res struct {
+	var resp struct {
 		Account struct {
 			Href string `json:"href"`
 		} `json:"account"`
 	}
 	e := new(StormpathError)
-	rr := restclient.RequestResponse{
+	req := &napping.Request{
 		Userinfo: app.userinfo(),
 		Url:      loginUrl,
 		Method:   "POST",
-		Data:     &m,
-		Result:   &res,
+		Payload:  &m,
+		Result:   &resp,
 		Error:    &e,
 	}
-	status, err := restclient.Do(&rr)
+	res, err := napping.Send(req)
 	if err != nil {
 		return acct, err
 	}
-	if status != 200 {
-		log.Println(status)
+	if res.Status() != 200 {
+		log.Println(res.Status())
 		log.Println(res)
 		log.Println(e)
 		return acct, InvalidUsernamePassword
 	}
-	return app.GetAccount(res.Account.Href)
+	return app.GetAccount(resp.Account.Href)
 }
 
 // GetAccount returns the specified account object, if it exists.
 func (app *Application) GetAccount(href string) (Account, error) {
 	acct := Account{}
 	e := new(StormpathError)
-	rr := restclient.RequestResponse{
+	req := &napping.Request{
 		Userinfo: app.userinfo(),
 		Url:      href,
 		Method:   "GET",
 		Result:   &acct,
 		Error:    e,
 	}
-	status, err := restclient.Do(&rr)
+	res, err := napping.Send(req)
 	if err != nil {
 		return acct, err
 	}
 	acct.app = app
-	if status != 200 {
-		log.Println(status)
+	if res.Status() != 200 {
+		log.Println(res.Status())
 		log.Println(e)
 		return acct, BadResponse
 	}
