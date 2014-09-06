@@ -1,4 +1,3 @@
----
 language: go
 notificaitons:
   email:
@@ -11,15 +10,6 @@ before_script:
 - go get -v github.com/bmizerany/assert
 env:
   global:
-  - secure: |-
-      m2x+bIMvTpRjkX4+eApUIhDG+jKk7dfakF/ulFlXO2nSJv1N8NHYvXAOI2UE
-      H+gICvtgah9qyZsaKbLkJyjSjrQS1jiHm3ZHCI6LEBmgKkY9OY0c/RH8puPE
-      TwFEpbMqXgn1JMUe9Kzflpf18JEUGXWc+ctSRaM/ttXFkJJHBRo=
-  - secure: |-
-      bF4nznjNdXx8bzpJe5ZT8y37hwEjRDlPDJos8Qte35umOppx9sLOT5VaeW3Q
-      a1yzNn1h4gYBVVdrXYo8oi419nYKSqynest6B7nXOI826Xi1jJT7eHYepsup
-      Lu+Ok/KYjMRE++T/8ISBiNIvfApnix0DT7DZ5PB7AAwOJWlfW88=
-  - secure: |-
-      e59+FcH6kKjhNJfTG+1hgHQjCD7sORvJytotEGgyaR42MqN1tEa4BvlHiK+Q
-      er0fHld6iLAuLiH0G4k9VhnXASrwe1tQ7Q73xJkYh9y/L4+kCaLKRdobtHrL
-      8ogVQSHX/GdlPT4Rnnm5l9TVFAwbJlumXbTsrBJtvKxlnzWbRUM=
+  - secure: L4wajfckE2Rfz6yqLckSqoGns4U5zDN2V1RRS9JLQT63OtNoJVDJSFPkN7nJUVEmoOLWZ2NlTovRsrU+WlmgR/xIIqMA4OJRtL8+jNLvgqE0cCEWOfREkkv0DVQSvbc0OIkKr1ImpagtftP0XbNmfzWEKHbzNM/ggLthz04Bu1Q=
+  - secure: jr7ZTKeox17n6uQk2uRJTlkaK6mm3yNA1jwZqUZGxX6u90loUxF2BpECfbYLtbR5DKcnWJUL9onX2LiTxVkk5sWZLCLm7GVS5eVzNrXMEW10aCVglISHKHEfaVW5eXiyf2juFu6KES+2j2DshctuVfqKJeWZR2bONIQDXmnkuAo=
+  - secure: Lug+mREVv3Xh+iyIUdfHAWsJtJEsd8cLjnlUeNEavuTMxAw2H7fZ7hBPDsYtLzLby+s86NHiIrKVhGjBLm+A2QdM2HPrNj+F9lzcZ62amJ6ZbIuZMfnj2uOlVWbV4yI4V3MM/J8tukwpvhAP7YEXbMdWkhVAAdsG+jyUjBGihLc=
